@@ -58,7 +58,7 @@ def local_ip():
         result = subprocess.run(
             ["powershell.exe", "-Command", "(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias 'Wi-Fi*','Ethernet*').IPAddress"],
             capture_output=True, text=True, timeout=2
-        
+        )
         ip_addr = result.stdout.strip().split()
         if ip_addr:
             return ip_addr[0] # Returns your actual Windows Wi-Fi/Ethernet IP
