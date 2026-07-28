@@ -50,9 +50,24 @@ def parse_ports(ports_arg, all_ports=False):
     else:
         return [int(ports_arg)]
 
+import subprocess
+
 def local_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
+        # Try to grab the Windows host IP address from inside WSL using PowerShell/ipconfig
+        result = subprocess.run(
+            ["powershell.exe", "-Command", "(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias 'Wi-Fi*','Ethernet*').IPAddress"],
+            capture_output=True, text=True, timeout=2
+        
+        ip_addr = result.stdout.strip().split()
+        if ip_addr:
+            return ip_addr[0] # Returns your actual Windows Wi-Fi/Ethernet IP
+    except Exception:
+        pass
+
+    # Fallback to standard socket method if PowerShell fails or if run natively on Windows/Linux
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         ip_addr = s.getsockname()[0]
         s.close()
