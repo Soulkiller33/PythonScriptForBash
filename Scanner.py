@@ -55,32 +55,7 @@ import subprocess
 import subprocess
 
 def local_ip():
-    try:
-        # Query Windows for the active Wi-Fi or Ethernet IPv4 address, filtering out virtual adapters
-        cmd = (
-            "powershell.exe -Command \""
-            "$ip = Get-NetIPAddress -AddressFamily IPv4 | "
-            "Where-Object {$_.InterfaceAlias -notlike '*WSL*' -and $_.InterfaceAlias -notlike '*VirtualBox*' -and $_.IPAddress -notlike '169.254*'} | "
-            "Select-Object -ExpandProperty IPAddress -First 1; "
-            "Write-Output $ip\""
-        )
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
-        ip_addr = result.stdout.strip()
-        
-        if ip_addr:
-            return ip_addr
-    except Exception:
-        pass
-
-    # Fallback to standard socket method
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip_addr = s.getsockname()[0]
-        s.close()
-        return ip_addr
-    except Exception:
-        return "127.0.0.1"
+    return "127.0.0.1"
 
 def scan_ports(ip, ports, output_file=None, all_ports=False):
     print(Fore.CYAN + "=" * 50 + Fore.RESET)
