@@ -2,7 +2,24 @@ import socket
 import argparse
 import os
 import time
+import ipaddress
 
+def get_network_prefix():
+    try:
+        # Get local IP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip_addr = s.getsockname()[0]
+        s.close()
+        
+        # Convert to network prefix (e.g., "192.168.1.")
+        # Assuming a standard /24 home network
+        parts = local_ip_addr.split('.')
+        network_base = f"{parts[0]}.{parts[1]}.{parts[2]}."
+        return network_base
+    except Exception:
+        return None
+    
 class Fore:
     GREEN = "\033[32m"
     YELLOW = "\033[33m"
@@ -68,7 +85,7 @@ def scan_ports(ip, ports, output_file=None, all_ports=False):
         for port in ports:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(0.05)
+                s.settimeout(0.50)
                 result = s.connect_ex((ip, port))
                 if result == 0:
                     message = f"  [+] PORT {port:<5} -> OPEN"
