@@ -3,17 +3,15 @@ import argparse
 import os
 import time
 import ipaddress
+import subprocess
 
 def get_network_prefix():
     try:
-        # Get local IP
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         local_ip_addr = s.getsockname()[0]
         s.close()
         
-        # Convert to network prefix (e.g., "192.168.1.")
-        # Assuming a standard /24 home network
         parts = local_ip_addr.split('.')
         network_base = f"{parts[0]}.{parts[1]}.{parts[2]}."
         return network_base
@@ -40,7 +38,7 @@ default_ports = [
 def parse_ports(ports_arg, all_ports=False):
     if all_ports:
         return list(range(0, 65536))
-    if ports_arg is None:
+    if not ports_arg:
         return default_ports
     elif "-" in ports_arg:
         start, end = map(int, ports_arg.split("-"))
@@ -49,10 +47,6 @@ def parse_ports(ports_arg, all_ports=False):
         return [int(p.strip()) for p in ports_arg.split(",")]
     else:
         return [int(ports_arg)]
-
-import subprocess
-
-import subprocess
 
 def local_ip():
     return "127.0.0.1"
@@ -85,7 +79,7 @@ def scan_ports(ip, ports, output_file=None, all_ports=False):
                 s.settimeout(0.05)
                 result = s.connect_ex((ip, port))
                 if result == 0:
-                    message = f"  [+] PORT {port:<5} -> OPEN"
+                    message = f"  [-] PORT {port:<5} -> OPEN"
                     print(Fore.GREEN + message + Fore.RESET)
                     open_ports.append(port)
                     log_lines.append(message + "\n")
@@ -142,7 +136,7 @@ def scan_ports(ip, ports, output_file=None, all_ports=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Python-based port scanner")
     parser.add_argument("--ip", required=False, help="Target IP or Hostname")
-    parser.add_argument("--ports", help="Port range (e.g. 20-100 or 80,443)")
+    parser.add_argument("--ports", default=None, help="Port range (e.g. 20-100 or 80,443)")
     parser.add_argument("--all", action="store_true", help="Scans all 65536 ports and shows closed ones")
     parser.add_argument("--output", type=str, default="scan_results.txt", help="Save results to file")
     args = parser.parse_args()
@@ -152,5 +146,4 @@ if __name__ == "__main__":
     ports = parse_ports(args.ports, args.all)
     scan_ports(resolved_ip, ports, args.output, args.all)
     
-    # CRITICAL: Print ONLY the IP address to standard output at the very end
     print(resolved_ip)
