@@ -76,7 +76,7 @@ def scan_ports(ip, ports, output_file=None, all_ports=False):
         for port in ports:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(0.05)
+                s.settimeout(0.50)
                 result = s.connect_ex((ip, port))
                 if result == 0:
                     message = f"  [-] PORT {port:<5} -> OPEN"
